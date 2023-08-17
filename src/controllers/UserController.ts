@@ -34,3 +34,17 @@ export const createUser = async (req: Request, res: Response) => {
     client.close();
   }
 };
+
+export const getUsers = async (req: Request, res: Response) => {
+  const { client, db } = await connect();
+
+  try {
+    const users = await db.collection("users").find().toArray();
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users" });
+  } finally {
+    client.close();
+  }
+};
