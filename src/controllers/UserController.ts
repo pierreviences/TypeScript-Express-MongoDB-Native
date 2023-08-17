@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ObjectId } from "mongodb";
 import { connect } from "../database/db";
 import { validateUserInput } from "../util/Validation";
+import User from "../models/User";
 
 export const createUser = async (req: Request, res: Response) => {
   const { client, db } = await connect();
@@ -19,7 +20,7 @@ export const createUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const newUser = {
+    const newUser: User = {
       _id: new ObjectId(),
       name,
       email,
