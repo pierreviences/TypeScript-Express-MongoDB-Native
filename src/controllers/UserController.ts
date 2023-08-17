@@ -48,3 +48,41 @@ export const getUsers = async (req: Request, res: Response) => {
     client.close();
   }
 };
+
+export const updateUser = async (req: Request, res: Response) => {
+  const { client, db } = await connect();
+
+  try {
+    const { name, email } = req.body;
+    const userId = new ObjectId(req.params.id);
+    const validation = validateUserInput(name, email);
+
+    if (!validation.valid) {
+      return res.status(400).json({ message: validation.message });
+    }
+
+    const existingUserWithEmail = await db
+      .collection("users")
+      .findOne({ email });
+    if (
+      existingUserWithEmail &&
+      existingUserWithEmail._id.toString() !== userId.toString()
+    ) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    const updatedUser = await db
+      .collection("users")
+      .findOneAndUpdate({ _id: userId }, { $set: { name, email } });
+
+    if (!updatedUser.value) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating user" });
+  } finally {
+    client.close();
+  }
+};
