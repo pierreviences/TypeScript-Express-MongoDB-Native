@@ -86,3 +86,25 @@ export const updateUser = async (req: Request, res: Response) => {
     client.close();
   }
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+  const { client, db } = await connect();
+
+  try {
+    const userId = new ObjectId(req.params.id);
+
+    const deletedUser = await db
+      .collection("users")
+      .findOneAndDelete({ _id: userId });
+
+    if (!deletedUser.value) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting user" });
+  } finally {
+    client.close();
+  }
+};
